@@ -1,9 +1,9 @@
-console.log("Importing Game...");
+console.log("Importing P2P-Sim...");
 
 
-// import { ImplementedGame } from './Game.js';
+import { P2pSimGame } from './Game.js';
 
 
 window.onload = () => {
-    // new ImplementedGame();
+    new P2pSimGame();
 }

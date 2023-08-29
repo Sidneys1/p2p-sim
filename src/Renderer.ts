@@ -19,20 +19,40 @@ export class Renderer {
             if (ctx === null)
                 throw "Could not get canvas context.";
             this._ctx = ctx;
+            console.debug(`Device ratio is ${this.DeviceScalingRatio}.`);
+            Renderer.Canvas.width = Renderer.Canvas.width * this.DeviceScalingRatio;
+            Renderer.Canvas.height = Renderer.Canvas.height * this.DeviceScalingRatio;
+            Renderer.Ctx.setTransform(this.DeviceScalingRatio, 0, 0, this.DeviceScalingRatio, 0.5, 0.5);
         }
         return this._ctx;
     }
 
-    public static get Width(): number { return this.Canvas.width; }
-
-    public static get Height(): number { return this.Canvas.height; }
-
-    private constructor() {}
-
-    private static _singleton: Renderer;
-    public static get S(): Renderer {
-        return this._singleton || (this._singleton = new this());
+    public static _deviceScalingRatio: number = 0;
+    public static get DeviceScalingRatio(): number {
+        if (this._deviceScalingRatio == 0) {
+            const dpr = window.devicePixelRatio || 1;
+            // @ts-ignore
+            const bsr = Renderer.Ctx.webkitBackingStorePixelRatio || // @ts-ignore
+                Renderer.Ctx.mozBackingStorePixelRatio ||// @ts-ignore
+                Renderer.Ctx.msBackingStorePixelRatio ||// @ts-ignore
+                Renderer.Ctx.oBackingStorePixelRatio ||// @ts-ignore
+                Renderer.Ctx.backingStorePixelRatio || 1;
+            this._deviceScalingRatio = dpr / bsr;
+        }
+        return this._deviceScalingRatio;
     }
+
+    public static get Width(): number { return this.Canvas.width / this.DeviceScalingRatio; }
+
+    public static get Height(): number { return this.Canvas.height / this.DeviceScalingRatio; }
+
+    private constructor() {
+    }
+
+    // private static _singleton: Renderer;
+    // public static get S(): Renderer {
+    //     return this._singleton || (this._singleton = new this());
+    // }
 
     static MeasureText(font: string, text: string): TextMetrics {
         this.Ctx.font = font;
@@ -76,8 +96,9 @@ export class Renderer {
         this.Ctx.globalAlpha = restore;
     }
 
-    static DrawLine(stroke: string, sx: number, sy: number, ex: number, ey: number) {
+    static DrawLine(stroke: string, sx: number, sy: number, ex: number, ey: number, thickness=1) {
         this.Ctx.strokeStyle = stroke;
+        this.Ctx.lineWidth = thickness;
         this.Ctx.beginPath();
         this.Ctx.moveTo(sx, sy);
         this.Ctx.lineTo(ex, ey);
@@ -91,8 +112,9 @@ export class Renderer {
         this.Ctx.fill();
     }
 
-    static DrawEllipse(stroke: string, x: number, y: number, rx: number, ry: number) {
+    static DrawEllipse(stroke: string, x: number, y: number, rx: number, ry: number, thickness=1) {
         this.Ctx.strokeStyle = stroke;
+        this.Ctx.lineWidth = thickness;
         this.Ctx.beginPath();
         this.Ctx.ellipse(x, y, rx, ry, 0, 0, 2 * Math.PI);
         this.Ctx.stroke();

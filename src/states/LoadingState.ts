@@ -1,7 +1,7 @@
 import { IGame } from "../Interfaces.js";
 import { LOADING_FONT } from "../Constants.js";
 import { GameState } from "./Base.js";
-import { InGameState } from "./InGameState.js";
+import { RunningState } from "./RunningState.js";
 import { Renderer } from "../Renderer.js";
 import { AssetManager } from "../modules/AssetManager.js";
 import { Button } from "../entities/Button.js";
@@ -18,13 +18,16 @@ export class LoadingState extends GameState {
         super(); 
 
         this._game = game;
+
+        // this.logo = AssetManager.GetImage('splash.svg');
         AssetManager.LoadAllAssets().then(() => {
             this.loading = false;
-            const startButton = new Button('Play', [Renderer.Width / 2 - 100, Renderer.Height / 2 - 12], [200, 50], () => {
-                this._game.SetState(new InGameState(this._game));
-            });
-            startButton.Font = '24pt sans-serif';
-            this.AddEntity(startButton);
+            this._game.SetState(new RunningState(this._game));
+            // const startButton = new Button('Play', [Renderer.Width / 2 - 100, Renderer.Height / 2 - 12], [200, 50], () => {
+            //     this._game.SetState(new RunningState(this._game));
+            // });
+            // startButton.Font = '24pt sans-serif';
+            // this.AddEntity(startButton);
         });
     }
     
